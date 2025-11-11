@@ -129,6 +129,13 @@
                                     <div class="duration-display" id="durationDisplay">Seleccione las fechas para calcular la duración</div>
                                 </div>
 
+                                <!-- Added optional document upload field -->
+                                <div class="form-group">
+                                    <label for="projectDocuments">Documentos del Proyecto (Opcional)</label>
+                                    <input type="file" id="projectDocuments" accept=".pdf,.doc,.docx,.xls,.xlsx,.zip" multiple>
+                                    <small class="form-hint">Puede subir múltiples archivos (PDF, Word, Excel, ZIP)</small>
+                                </div>
+
                                 <!-- User stories section with CRUD functionality -->
                                 <div class="form-group">
                                     <label>Historias de Usuario *</label>
@@ -226,10 +233,11 @@
                                     </div>
                                 </div>
 
+                                <!-- Restricted file types to Excel and PDF only -->
                                 <div class="form-group">
                                     <label for="evidenceFile">Archivo de Evidencia *</label>
-                                    <input type="file" id="evidenceFile" required accept=".pdf,.doc,.docx,.jpg,.png,.zip">
-                                    <small class="form-hint">Suba evidencia de las historias completadas</small>
+                                    <input type="file" id="evidenceFile" required accept=".pdf,.xls,.xlsx">
+                                    <small class="form-hint">Solo se aceptan archivos Excel (.xls, .xlsx) y PDF (.pdf). Por favor organice toda su evidencia en uno de estos formatos.</small>
                                 </div>
 
                                 <div class="modal-actions">
@@ -258,6 +266,8 @@
                                 </div>
 
                                 <div class="modal-actions">
+                                    <!-- Added "No Aprobar" button -->
+                                    <button type="button" class="btn btn-danger" id="rejectProgressBtn">No Aprobar</button>
                                     <button type="button" class="btn btn-secondary" data-action="cancel">Cancelar</button>
                                     <button type="submit" class="btn btn-primary">Aprobar Historias</button>
                                 </div>
@@ -369,6 +379,27 @@
 
     <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
+
+    <!-- Added cancel project modal with justification -->
+    <!-- Cancel Project Modal -->
+    <div id="cancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Cancelar Proyecto</h3>
+                <button class="close-btn" data-modal="cancelModal">&times;</button>
+            </div>
+            <form id="cancelForm">
+                <div class="form-group">
+                    <label for="cancelReason">Justificación de Cancelación *</label>
+                    <textarea id="cancelReason" rows="4" required placeholder="Por favor explique por qué está cancelando este proyecto..."></textarea>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" data-action="cancel">Volver</button>
+                    <button type="submit" class="btn btn-danger">Confirmar Cancelación</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

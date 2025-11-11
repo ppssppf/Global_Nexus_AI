@@ -140,16 +140,6 @@ body {
   border-bottom-color: #764ba2;
 }
 
-.manager-only {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.manager-only.enabled {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 /* Main Content */
 .main-content {
   padding: 2rem 0;
@@ -947,6 +937,11 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* Status colors updated */
+.status-en-revision {
+  background: #bfdbfe;
+  color: #1e40af;
+}
+
 .status-devuelto {
   background: #fed7aa;
   color: #9a3412;
@@ -960,6 +955,12 @@ input[type="range"]::-webkit-slider-thumb {
 .status-cancelado {
   background: #e5e7eb;
   color: #374151;
+}
+
+/* Status colors updated */
+.status-completado {
+  background: #d1fae5;
+  color: #065f46;
 }
 
 /* Users grid */

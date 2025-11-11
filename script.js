@@ -137,6 +137,10 @@ const APP = {
       this.approveManagerProgress()
     })
 
+    document.getElementById("rejectProgressBtn").addEventListener("click", () => {
+      this.rejectProgress()
+    })
+
     // History filters
     document.getElementById("filterLeader").addEventListener("input", () => this.renderHistory())
     document.getElementById("filterCompany").addEventListener("input", () => this.renderHistory())
@@ -156,6 +160,11 @@ const APP = {
     document.getElementById("userForm").addEventListener("submit", (e) => {
       e.preventDefault()
       this.saveUser()
+    })
+
+    document.getElementById("cancelForm").addEventListener("submit", (e) => {
+      e.preventDefault()
+      this.confirmCancelProject()
     })
 
     // Close modals
@@ -376,6 +385,9 @@ const APP = {
     const startDate = document.getElementById("projectStartDate").value
     const endDate = document.getElementById("projectEndDate").value
 
+    const documentsInput = document.getElementById("projectDocuments")
+    const documents = documentsInput.files.length > 0 ? Array.from(documentsInput.files).map((f) => f.name) : []
+
     if (this.tempUserStories.length === 0) {
       this.showToast("Debe agregar al menos una historia de usuario", "error")
       return
@@ -391,6 +403,7 @@ const APP = {
       project.startDate = startDate
       project.endDate = endDate
       project.userStories = [...this.tempUserStories]
+      project.documents = documents
       project.status = "pendiente"
       project.updatedAt = new Date().toISOString()
 
@@ -406,6 +419,7 @@ const APP = {
         startDate,
         endDate,
         userStories: [...this.tempUserStories],
+        documents,
         leader: this.currentUser.name,
         leaderId: this.currentUser.id,
         status: "pendiente",
@@ -423,15 +437,35 @@ const APP = {
   },
 
   cancelProject(projectId) {
-    if (confirm("¿Está seguro de cancelar este proyecto?")) {
-      const project = this.projects.find((p) => p.id === projectId)
-      project.status = "cancelado"
-      project.canceledAt = new Date().toISOString()
+    this.currentProjectId = projectId
+    const project = this.projects.find((p) => p.id === projectId)
 
-      this.saveProjects()
-      this.updateUI()
-      this.showToast("Proyecto cancelado", "info")
+    if (project.status === "en-revision") {
+      this.showToast("No puede cancelar un proyecto mientras está en revisión", "error")
+      return
     }
+
+    document.getElementById("cancelReason").value = ""
+    document.getElementById("cancelModal").classList.add("active")
+  },
+
+  confirmCancelProject() {
+    const reason = document.getElementById("cancelReason").value.trim()
+
+    if (!reason) {
+      this.showToast("Debe proporcionar una justificación", "error")
+      return
+    }
+
+    const project = this.projects.find((p) => p.id === this.currentProjectId)
+    project.status = "cancelado"
+    project.canceledAt = new Date().toISOString()
+    project.cancelReason = reason
+
+    this.saveProjects()
+    this.closeModal("cancelModal")
+    this.updateUI()
+    this.showToast("Proyecto cancelado", "info")
   },
 
   renderProjects() {
@@ -447,8 +481,11 @@ const APP = {
     }
 
     grid.innerHTML = userProjects
-      .map(
-        (project) => `
+      .map((project) => {
+        const showEdit = project.status === "devuelto"
+        const showCancel = project.status === "pendiente" || project.status === "aprobado"
+
+        return `
             <div class="project-card">
                 <div class="project-card-header">
                     <div>
@@ -470,24 +507,33 @@ const APP = {
                     <div class="project-meta-item">
                         <strong>Historias de usuario:</strong> ${project.userStories.length}
                     </div>
+                    ${
+                      project.documents && project.documents.length > 0
+                        ? `
+                    <div class="project-meta-item">
+                        <strong>Documentos:</strong> ${project.documents.length} archivo(s)
+                    </div>
+                    `
+                        : ""
+                    }
                     <div class="project-meta-item">
                         <strong>Creado:</strong> ${new Date(project.createdAt).toLocaleDateString()}
                     </div>
                 </div>
                 <div class="project-actions">
-                    ${project.status === "devuelto" ? `<button class="btn btn-primary" onclick="APP.openProjectModal(${project.id})">Editar</button>` : '<button class="btn btn-secondary" disabled>Editar</button>'}
-                    ${project.status === "pendiente" || project.status === "devuelto" ? `<button class="btn btn-danger" onclick="APP.cancelProject(${project.id})">Cancelar</button>` : ""}
+                    ${showEdit ? `<button class="btn btn-primary" onclick="APP.openProjectModal(${project.id})">Editar</button>` : ""}
+                    ${showCancel ? `<button class="btn btn-danger" onclick="APP.cancelProject(${project.id})">Cancelar</button>` : ""}
                 </div>
             </div>
-        `,
-      )
+        `
+      })
       .join("")
   },
 
   // Approval Module
   renderPendingApprovals() {
     const container = document.getElementById("pendingProjects")
-    const pending = this.projects.filter((p) => p.status === "pendiente")
+    const pending = this.projects.filter((p) => p.status === "pendiente" || p.status === "en-revision")
 
     if (pending.length === 0) {
       container.innerHTML =
@@ -502,6 +548,7 @@ const APP = {
                 <div class="card-content">
                     <div class="card-info">
                         <h3>${project.name}</h3>
+                        ${project.status === "en-revision" ? '<span class="project-status status-en-revision">En Revisión</span>' : ""}
                         <p>${project.description}</p>
                         <div class="card-details">
                             <div class="detail-row">
@@ -519,6 +566,15 @@ const APP = {
                             <div class="detail-row">
                                 <strong>Historias de usuario:</strong> <span>${project.userStories.length}</span>
                             </div>
+                            ${
+                              project.documents && project.documents.length > 0
+                                ? `
+                            <div class="detail-row">
+                                <strong>Documentos adjuntos:</strong> <span>${project.documents.join(", ")}</span>
+                            </div>
+                            `
+                                : ""
+                            }
                         </div>
                     </div>
                     <div class="card-actions">
@@ -536,6 +592,13 @@ const APP = {
     const project = this.projects.find((p) => p.id === projectId)
     const modal = document.getElementById("approvalModal")
 
+    if (project.status === "pendiente") {
+      project.status = "en-revision"
+      project.reviewStartedAt = new Date().toISOString()
+      this.saveProjects()
+      this.updateUI() // Refresh the UI to reflect status change
+    }
+
     document.getElementById("approvalProjectDetails").innerHTML = `
             <div class="project-detail-box">
                 <h4>${project.name}</h4>
@@ -546,6 +609,18 @@ const APP = {
                     <div><strong>IA:</strong> ${this.getAILevelLabel(project.aiLevel)}</div>
                     <div><strong>Historias:</strong> ${project.userStories.length}</div>
                 </div>
+                ${
+                  project.documents && project.documents.length > 0
+                    ? `
+                <div style="margin-top: 1rem;">
+                    <strong>Documentos adjuntos:</strong>
+                    <ul style="list-style: none; padding-left: 0; margin-top: 0.5rem;">
+                        ${project.documents.map((doc) => `<li>📎 ${doc}</li>`).join("")}
+                    </ul>
+                </div>
+                `
+                    : ""
+                }
                 <div class="user-stories-preview">
                     <strong>Historias de Usuario:</strong>
                     <ul>
@@ -628,6 +703,8 @@ const APP = {
         const progress =
           project.userStories.length > 0 ? Math.round((approvedCount / project.userStories.length) * 100) : 0
 
+        const showApproveButton = isManager && pendingCount > 0
+
         return `
                 <div class="tracking-card">
                     <div class="card-content">
@@ -660,7 +737,8 @@ const APP = {
                             </div>
                         </div>
                         <div class="card-actions">
-                            ${isManager ? `<button class="btn btn-primary" onclick="APP.openManagerProgressModal(${project.id})" ${pendingCount === 0 ? "disabled" : ""}>Aprobar Progreso ${pendingCount > 0 ? `(${pendingCount})` : ""}</button>` : `<button class="btn btn-primary" onclick="APP.openLeaderProgressModal(${project.id})">Actualizar Progreso</button>`}
+                            ${isManager && showApproveButton ? `<button class="btn btn-primary" onclick="APP.openManagerProgressModal(${project.id})">Aprobar Progreso (${pendingCount})</button>` : ""}
+                            ${!isManager ? `<button class="btn btn-primary" onclick="APP.openLeaderProgressModal(${project.id})">Actualizar Progreso</button>` : ""}
                         </div>
                     </div>
                 </div>
@@ -806,13 +884,44 @@ const APP = {
 
     project.lastApproved = new Date().toISOString()
 
+    const allApproved = project.userStories.every((s) => s.approved)
+    if (allApproved) {
+      project.status = "completado"
+      project.completedAt = new Date().toISOString()
+      this.showToast(`Proyecto completado: todas las historias han sido aprobadas`, "success")
+    }
+
     this.saveProjects()
     this.closeModal("managerProgressModal")
     this.updateUI()
-    this.showToast(
-      `${selectedIndices.length} ${selectedIndices.length === 1 ? "historia aprobada" : "historias aprobadas"}`,
-      "success",
-    )
+
+    if (!allApproved) {
+      this.showToast(
+        `${selectedIndices.length} ${selectedIndices.length === 1 ? "historia aprobada" : "historias aprobadas"}`,
+        "success",
+      )
+    }
+  },
+
+  rejectProgress() {
+    if (confirm("¿Está seguro de NO APROBAR este progreso? Las historias volverán a estado pendiente.")) {
+      const project = this.projects.find((p) => p.id === this.currentProjectId)
+
+      // Revert all pending approval stories back to not completed
+      project.userStories.forEach((story) => {
+        if (story.pendingApproval) {
+          story.pendingApproval = false
+          story.completed = false
+        }
+      })
+
+      project.lastRejection = new Date().toISOString()
+
+      this.saveProjects()
+      this.closeModal("managerProgressModal")
+      this.updateUI()
+      this.showToast("Progreso no aprobado. Las historias han vuelto a estado pendiente.", "error")
+    }
   },
 
   // History Module
@@ -845,10 +954,10 @@ const APP = {
     if (isManager) {
       document.getElementById("totalProjects").textContent = this.projects.length
       document.getElementById("approvedProjects").textContent = this.projects.filter(
-        (p) => p.status === "aprobado",
+        (p) => p.status === "aprobado" || p.status === "completado",
       ).length
       document.getElementById("pendingProjectsCount").textContent = this.projects.filter(
-        (p) => p.status === "pendiente",
+        (p) => p.status === "pendiente" || p.status === "en-revision",
       ).length
       document.getElementById("rejectedProjects").textContent = this.projects.filter(
         (p) => p.status === "no-aprobado",
@@ -999,10 +1108,12 @@ const APP = {
   getStatusLabel(status) {
     const labels = {
       pendiente: "Pendiente",
+      "en-revision": "En Revisión",
       devuelto: "Devuelto",
       aprobado: "Aprobado",
       "no-aprobado": "No Aprobado",
       cancelado: "Cancelado",
+      completado: "Completado",
     }
     return labels[status] || status
   },
