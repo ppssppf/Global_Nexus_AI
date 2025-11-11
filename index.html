@@ -35,7 +35,7 @@
         <header class="header">
             <div class="container">
                 <div class="header-content">
-                    <h1 class="logo">MVM NEXUS AI</h1>
+                    <h1 class="logo"><img src="assets/logo.png" alt="MVM NEXUS AI" justify="center" height="100px"></h1>
                     <div class="user-info">
                         <span class="user-name">
                             <strong id="currentUserName"></strong> 
@@ -107,7 +107,7 @@
                                             <option value="bajo">Bajo - Uso básico de herramientas IA</option>
                                             <option value="medio">Medio - Integración moderada de IA</option>
                                             <option value="alto">Alto - Implementación profunda de IA</option>
-                                            <option value="profundo">Profundo - IA como componente central</option>
+                                            <option value="avanzado">Avanzado - IA como componente central</option>
                                         </select>
                                     </div>
                                 </div>
@@ -398,6 +398,22 @@
                     <button type="submit" class="btn btn-danger">Confirmar Cancelación</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- View Cancellation Reason Modal -->
+    <div id="viewCancelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Razón de Cancelación</h3>
+                <button class="close-btn" data-modal="viewCancelModal">&times;</button>
+            </div>
+            <div style="padding: 1.5rem;">
+                <div id="cancelReasonContent" class="project-detail-box"></div>
+                <div style="text-align: right; margin-top: 1rem;">
+                    <button type="button" class="btn btn-secondary" data-action="closeViewCancel">Cerrar</button>
+                </div>
+            </div>
         </div>
     </div>
 

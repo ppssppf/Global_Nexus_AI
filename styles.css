@@ -442,6 +442,7 @@ form {
 }
 
 .form-group input[type="text"],
+.form-group input[type="password"],
 .form-group input[type="number"],
 .form-group input[type="date"],
 .form-group input[type="file"],
@@ -1024,6 +1025,26 @@ input[type="range"]::-webkit-slider-thumb {
 .btn-small {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
+}
+
+/* Add styling for view button in history table */
+.btn-view {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.85rem;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-view:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
 }
 
 /* Responsive Design */

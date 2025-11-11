@@ -182,6 +182,12 @@ const APP = {
         this.closeModal(modal.id)
       })
     })
+
+    document.querySelectorAll('[data-action="closeViewCancel"]').forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.closeModal("viewCancelModal")
+      })
+    })
   },
 
   // Authentication
@@ -984,6 +990,7 @@ const APP = {
                         <th>Historias</th>
                         <th>Progreso</th>
                         <th>Fecha</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -995,6 +1002,11 @@ const APP = {
                         const totalStories = project.userStories ? project.userStories.length : 0
                         const progress = totalStories > 0 ? Math.round((approvedCount / totalStories) * 100) : 0
 
+                        const viewButton =
+                          project.status === "cancelado"
+                            ? `<button class="btn btn-view" onclick="APP.viewCancelReason(${project.id})" title="Ver razón de cancelación">👁️ Ver</button>`
+                            : ""
+
                         return `
                             <tr>
                                 <td><strong>${project.name}</strong></td>
@@ -1005,6 +1017,7 @@ const APP = {
                                 <td>${approvedCount}/${totalStories}</td>
                                 <td>${progress}%</td>
                                 <td>${new Date(project.createdAt).toLocaleDateString()}</td>
+                                <td>${viewButton}</td>
                             </tr>
                         `
                       })
@@ -1123,7 +1136,8 @@ const APP = {
       bajo: "Bajo",
       medio: "Medio",
       alto: "Alto",
-      profundo: "Profundo",
+      avanzado: "Avanzado",
+      profundo: "Avanzado", // Keep backwards compatibility for old data
     }
     return labels[level] || level
   },
@@ -1138,6 +1152,32 @@ const APP = {
       otro: "Otro",
     }
     return labels[incentive] || incentive
+  },
+
+  viewCancelReason(projectId) {
+    const project = this.projects.find((p) => p.id === projectId)
+
+    if (!project || !project.cancelReason) {
+      this.showToast("No se encontró información de cancelación", "error")
+      return
+    }
+
+    const modal = document.getElementById("viewCancelModal")
+    const content = document.getElementById("cancelReasonContent")
+
+    content.innerHTML = `
+            <h4>${project.name}</h4>
+            <div style="margin-top: 1rem;">
+                <strong style="color: #374151;">Fecha de Cancelación:</strong>
+                <p style="margin-top: 0.5rem; color: #6b7280;">${new Date(project.canceledAt).toLocaleString()}</p>
+            </div>
+            <div style="margin-top: 1rem;">
+                <strong style="color: #374151;">Razón de Cancelación:</strong>
+                <p style="margin-top: 0.5rem; color: #6b7280; white-space: pre-wrap;">${project.cancelReason}</p>
+            </div>
+        `
+
+    modal.classList.add("active")
   },
 }
 
