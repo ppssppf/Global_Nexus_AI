@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MVM NEXUS AI - Gestión de Proyectos con IA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1 class="logo">MVM NEXUS AI</h1>
+                <div class="user-info">
+                    <select id="roleSelector" class="role-selector">
+                        <option value="developer">Desarrollador</option>
+                        <option value="manager">Gerente</option>
+                        <option value="approver">Aprobador</option>
+                    </select>
+                    <span class="user-name">Usuario: <strong id="currentUser">Admin</strong></span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="container">
+            <ul class="nav-list">
+                <li><a href="#" class="nav-link active" data-module="projects">Gestión de Proyectos</a></li>
+                <li><a href="#" class="nav-link" data-module="approval">Aprobación</a></li>
+                <li><a href="#" class="nav-link" data-module="tracking">Seguimiento</a></li>
+                <li><a href="#" class="nav-link manager-only" data-module="history">Histórico</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Module 1: Project Management (CRUD) -->
+            <section id="projects-module" class="module active">
+                <div class="module-header">
+                    <h2>Gestión de Proyectos</h2>
+                    <button class="btn btn-primary" id="newProjectBtn">+ Nuevo Proyecto</button>
+                </div>
+
+                <div class="projects-grid" id="projectsGrid">
+                    <!-- Projects will be dynamically loaded here -->
+                </div>
+
+                <!-- Create/Edit Project Modal -->
+                <div id="projectModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 id="modalTitle">Nuevo Proyecto</h3>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <form id="projectForm">
+                            <div class="form-group">
+                                <label for="projectName">Nombre del Proyecto *</label>
+                                <input type="text" id="projectName" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="projectDescription">Descripción *</label>
+                                <textarea id="projectDescription" rows="3" required></textarea>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="projectLeader">Líder del Proyecto *</label>
+                                    <input type="text" id="projectLeader" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="projectCompany">Empresa *</label>
+                                    <input type="text" id="projectCompany" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="aiLevel">Nivel de Implementación de IA *</label>
+                                <select id="aiLevel" required>
+                                    <option value="">Seleccionar...</option>
+                                    <option value="bajo">Bajo - Uso básico de herramientas IA</option>
+                                    <option value="medio">Medio - Integración moderada de IA</option>
+                                    <option value="alto">Alto - Implementación profunda de IA</option>
+                                    <option value="profundo">Profundo - IA como componente central</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="projectDocuments">Documentos del Proyecto (simulado)</label>
+                                <input type="file" id="projectDocuments" multiple accept=".pdf,.doc,.docx">
+                                <small class="form-hint">Seleccione archivos PDF o DOC (simulado)</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="estimatedDuration">Duración Estimada (meses)</label>
+                                <input type="number" id="estimatedDuration" min="1" max="36">
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar y Enviar a Aprobación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module 2: Project Approval -->
+            <section id="approval-module" class="module">
+                <div class="module-header">
+                    <h2>Proyectos Pendientes de Aprobación</h2>
+                    <p class="module-description">Departamento de Innovación Tecnológica</p>
+                </div>
+
+                <div id="pendingProjects" class="approval-list">
+                    <!-- Pending projects will be loaded here -->
+                </div>
+
+                <!-- Approval Modal -->
+                <div id="approvalModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Aprobar Proyecto</h3>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <div id="approvalProjectDetails"></div>
+                        <form id="approvalForm">
+                            <div class="form-group">
+                                <label>Incentivos Asignados</label>
+                                <div class="incentives-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="incentive" value="economico">
+                                        Incentivo Económico (Bono por proyecto exitoso)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="incentive" value="laboral">
+                                        Incentivo Laboral (Promoción o reconocimiento)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="incentive" value="temporal">
+                                        Incentivo Temporal (Tiempo adicional o flexibilidad)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="incentive" value="formacion">
+                                        Formación Especializada (Cursos o certificaciones)
+                                    </label>
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="incentive" value="recursos">
+                                        Recursos Adicionales (Presupuesto o herramientas)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="approvalStartDate">Fecha de Inicio *</label>
+                                <input type="date" id="approvalStartDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="approvalEndDate">Fecha de Finalización *</label>
+                                <input type="date" id="approvalEndDate" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="userStories">Historias de Usuario (HUs)</label>
+                                <textarea id="userStories" rows="4" placeholder="Ingrese las historias de usuario separadas por líneas"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="requirements">Requisitos del Proyecto</label>
+                                <textarea id="requirements" rows="4" placeholder="Ingrese los requisitos del proyecto"></textarea>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-danger" id="rejectBtn">Rechazar</button>
+                                <button type="button" class="btn btn-secondary" id="cancelApprovalBtn">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Aprobar Proyecto</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module 3: Project Tracking -->
+            <section id="tracking-module" class="module">
+                <div class="module-header">
+                    <h2>Seguimiento de Proyectos</h2>
+                    <p class="module-description">Monitoreo de progreso y uso de IA</p>
+                </div>
+
+                <div id="trackingProjects" class="tracking-list">
+                    <!-- Approved projects will be loaded here -->
+                </div>
+
+                <!-- Update Progress Modal -->
+                <div id="progressModal" class="modal">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3>Actualizar Progreso</h3>
+                            <button class="close-btn">&times;</button>
+                        </div>
+                        <div id="progressProjectDetails"></div>
+                        <form id="progressForm">
+                            <div class="form-group">
+                                <label for="progressPercentage">Porcentaje de Avance (%)</label>
+                                <input type="range" id="progressPercentage" min="0" max="100" value="0" step="5">
+                                <div class="progress-display">
+                                    <span id="progressValue">0%</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="aiUsageVerification">Verificación de Uso de IA</label>
+                                <select id="aiUsageVerification" required>
+                                    <option value="verificado">✓ Verificado - Uso activo de IA</option>
+                                    <option value="parcial">⚠ Parcial - Uso esporádico de IA</option>
+                                    <option value="no-verificado">✗ No verificado - Sin evidencia de uso</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="progressNotes">Notas de Progreso</label>
+                                <textarea id="progressNotes" rows="3" placeholder="Describa los avances y el uso de IA en el desarrollo"></textarea>
+                            </div>
+
+                            <div class="modal-actions">
+                                <button type="button" class="btn btn-secondary" id="cancelProgressBtn">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Actualizar Progreso</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Module 4: Project History (Manager Only) -->
+            <section id="history-module" class="module">
+                <div class="module-header">
+                    <h2>Histórico de Proyectos</h2>
+                    <div class="filter-controls">
+                        <input type="text" id="filterLeader" placeholder="Filtrar por líder...">
+                        <input type="text" id="filterCompany" placeholder="Filtrar por empresa...">
+                        <select id="filterStatus">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente">Pendiente</option>
+                            <option value="aprobado">Aprobado</option>
+                            <option value="rechazado">Rechazado</option>
+                            <option value="completado">Completado</option>
+                        </select>
+                        <button class="btn btn-secondary" id="clearFilters">Limpiar Filtros</button>
+                    </div>
+                </div>
+
+                <div class="history-stats">
+                    <div class="stat-card">
+                        <h4>Total Proyectos</h4>
+                        <p class="stat-number" id="totalProjects">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Aprobados</h4>
+                        <p class="stat-number" id="approvedProjects">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Pendientes</h4>
+                        <p class="stat-number" id="pendingProjectsCount">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Rechazados</h4>
+                        <p class="stat-number" id="rejectedProjects">0</p>
+                    </div>
+                </div>
+
+                <div id="historyTable" class="history-table">
+                    <!-- History table will be loaded here -->
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
