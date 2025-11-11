@@ -7,280 +7,365 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <h1 class="logo">MVM NEXUS AI</h1>
-                <div class="user-info">
-                    <select id="roleSelector" class="role-selector">
-                        <option value="developer">Desarrollador</option>
-                        <option value="manager">Gerente</option>
-                        <option value="approver">Aprobador</option>
-                    </select>
-                    <span class="user-name">Usuario: <strong id="currentUser">Admin</strong></span>
+    <!-- Added login screen that displays before main app -->
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-screen">
+        <div class="login-container">
+            <div class="login-header">
+                <h1>MVM NEXUS AI</h1>
+                <p>Gestión de Proyectos con IA</p>
+            </div>
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="loginUsername">Usuario</label>
+                    <input type="text" id="loginUsername" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main app is now hidden by default until login -->
+    <div id="mainApp" style="display: none;">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <h1 class="logo">MVM NEXUS AI</h1>
+                    <div class="user-info">
+                        <span class="user-name">
+                            <strong id="currentUserName"></strong> 
+                            <span id="currentUserRole"></span>
+                        </span>
+                        <button class="btn btn-logout" id="logoutBtn">Cerrar Sesión</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <!-- Navigation -->
-    <nav class="navigation">
-        <div class="container">
-            <ul class="nav-list">
-                <li><a href="#" class="nav-link active" data-module="projects">Gestión de Proyectos</a></li>
-                <li><a href="#" class="nav-link" data-module="approval">Aprobación</a></li>
-                <li><a href="#" class="nav-link" data-module="tracking">Seguimiento</a></li>
-                <li><a href="#" class="nav-link manager-only" data-module="history">Histórico</a></li>
-            </ul>
-        </div>
-    </nav>
+        <!-- Navigation -->
+        <nav class="navigation">
+            <div class="container">
+                <ul class="nav-list">
+                    <!-- Updated navigation for new role structure -->
+                    <li class="nav-item leader-only"><a href="#" class="nav-link active" data-module="projects">Gestión de Proyectos</a></li>
+                    <li class="nav-item manager-only"><a href="#" class="nav-link" data-module="approval">Aprobación</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" data-module="tracking">Seguimiento</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link" data-module="history">Histórico</a></li>
+                    <li class="nav-item manager-only"><a href="#" class="nav-link" data-module="users">Registro de Usuarios</a></li>
+                </ul>
+            </div>
+        </nav>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="container">
-            <!-- Module 1: Project Management (CRUD) -->
-            <section id="projects-module" class="module active">
-                <div class="module-header">
-                    <h2>Gestión de Proyectos</h2>
-                    <button class="btn btn-primary" id="newProjectBtn">+ Nuevo Proyecto</button>
-                </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Module 1: Project Management (CRUD) - Leader Only -->
+                <section id="projects-module" class="module active">
+                    <div class="module-header">
+                        <h2>Gestión de Proyectos</h2>
+                        <button class="btn btn-primary" id="newProjectBtn">+ Nuevo Proyecto</button>
+                    </div>
 
-                <div class="projects-grid" id="projectsGrid">
-                    <!-- Projects will be dynamically loaded here -->
-                </div>
+                    <div class="projects-grid" id="projectsGrid">
+                        <!-- Projects will be dynamically loaded here -->
+                    </div>
 
-                <!-- Create/Edit Project Modal -->
-                <div id="projectModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3 id="modalTitle">Nuevo Proyecto</h3>
-                            <button class="close-btn">&times;</button>
-                        </div>
-                        <form id="projectForm">
-                            <div class="form-group">
-                                <label for="projectName">Nombre del Proyecto *</label>
-                                <input type="text" id="projectName" required>
+                    <!-- Updated project modal with user stories CRUD and calculated duration -->
+                    <!-- Create/Edit Project Modal -->
+                    <div id="projectModal" class="modal">
+                        <div class="modal-content modal-large">
+                            <div class="modal-header">
+                                <h3 id="modalTitle">Nuevo Proyecto</h3>
+                                <button class="close-btn" data-modal="projectModal">&times;</button>
                             </div>
-
-                            <div class="form-group">
-                                <label for="projectDescription">Descripción *</label>
-                                <textarea id="projectDescription" rows="3" required></textarea>
-                            </div>
-
-                            <div class="form-row">
+                            <form id="projectForm">
                                 <div class="form-group">
-                                    <label for="projectLeader">Líder del Proyecto *</label>
-                                    <input type="text" id="projectLeader" required>
+                                    <label for="projectName">Nombre del Proyecto *</label>
+                                    <input type="text" id="projectName" required>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="projectCompany">Empresa *</label>
-                                    <input type="text" id="projectCompany" required>
+                                    <label for="projectDescription">Descripción *</label>
+                                    <textarea id="projectDescription" rows="3" required></textarea>
                                 </div>
-                            </div>
 
-                            <div class="form-group">
-                                <label for="aiLevel">Nivel de Implementación de IA *</label>
-                                <select id="aiLevel" required>
-                                    <option value="">Seleccionar...</option>
-                                    <option value="bajo">Bajo - Uso básico de herramientas IA</option>
-                                    <option value="medio">Medio - Integración moderada de IA</option>
-                                    <option value="alto">Alto - Implementación profunda de IA</option>
-                                    <option value="profundo">Profundo - IA como componente central</option>
-                                </select>
-                            </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="projectCompany">Empresa *</label>
+                                        <input type="text" id="projectCompany" required>
+                                    </div>
 
-                            <div class="form-group">
-                                <label for="projectDocuments">Documentos del Proyecto (simulado)</label>
-                                <input type="file" id="projectDocuments" multiple accept=".pdf,.doc,.docx">
-                                <small class="form-hint">Seleccione archivos PDF o DOC (simulado)</small>
-                            </div>
+                                    <div class="form-group">
+                                        <label for="aiLevel">Nivel de Implementación de IA *</label>
+                                        <select id="aiLevel" required>
+                                            <option value="">Seleccionar...</option>
+                                            <option value="bajo">Bajo - Uso básico de herramientas IA</option>
+                                            <option value="medio">Medio - Integración moderada de IA</option>
+                                            <option value="alto">Alto - Implementación profunda de IA</option>
+                                            <option value="profundo">Profundo - IA como componente central</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="estimatedDuration">Duración Estimada (meses)</label>
-                                <input type="number" id="estimatedDuration" min="1" max="36">
-                            </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="projectStartDate">Fecha de Inicio *</label>
+                                        <input type="date" id="projectStartDate" required>
+                                    </div>
 
-                            <div class="modal-actions">
-                                <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Guardar y Enviar a Aprobación</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </section>
+                                    <div class="form-group">
+                                        <label for="projectEndDate">Fecha de Fin *</label>
+                                        <input type="date" id="projectEndDate" required>
+                                    </div>
+                                </div>
 
-            <!-- Module 2: Project Approval -->
-            <section id="approval-module" class="module">
-                <div class="module-header">
-                    <h2>Proyectos Pendientes de Aprobación</h2>
-                    <p class="module-description">Departamento de Innovación Tecnológica</p>
-                </div>
+                                <div class="form-group">
+                                    <label>Duración Estimada</label>
+                                    <div class="duration-display" id="durationDisplay">Seleccione las fechas para calcular la duración</div>
+                                </div>
 
-                <div id="pendingProjects" class="approval-list">
-                    <!-- Pending projects will be loaded here -->
-                </div>
+                                <!-- User stories section with CRUD functionality -->
+                                <div class="form-group">
+                                    <label>Historias de Usuario *</label>
+                                    <div class="user-stories-section">
+                                        <div class="user-story-input">
+                                            <input type="text" id="newUserStory" placeholder="Ingrese una historia de usuario">
+                                            <button type="button" class="btn btn-primary" id="addUserStoryBtn">Agregar</button>
+                                        </div>
+                                        <ul id="userStoriesList" class="user-stories-list">
+                                            <!-- User stories will be added here -->
+                                        </ul>
+                                    </div>
+                                </div>
 
-                <!-- Approval Modal -->
-                <div id="approvalModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Aprobar Proyecto</h3>
-                            <button class="close-btn">&times;</button>
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" data-action="cancel">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar y Enviar a Aprobación</button>
+                                </div>
+                            </form>
                         </div>
-                        <div id="approvalProjectDetails"></div>
-                        <form id="approvalForm">
-                            <div class="form-group">
-                                <label>Incentivos Asignados</label>
-                                <div class="incentives-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="incentive" value="economico">
-                                        Incentivo Económico (Bono por proyecto exitoso)
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="incentive" value="laboral">
-                                        Incentivo Laboral (Promoción o reconocimiento)
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="incentive" value="temporal">
-                                        Incentivo Temporal (Tiempo adicional o flexibilidad)
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="incentive" value="formacion">
-                                        Formación Especializada (Cursos o certificaciones)
-                                    </label>
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="incentive" value="recursos">
-                                        Recursos Adicionales (Presupuesto o herramientas)
-                                    </label>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="approvalStartDate">Fecha de Inicio *</label>
-                                <input type="date" id="approvalStartDate" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="approvalEndDate">Fecha de Finalización *</label>
-                                <input type="date" id="approvalEndDate" required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="userStories">Historias de Usuario (HUs)</label>
-                                <textarea id="userStories" rows="4" placeholder="Ingrese las historias de usuario separadas por líneas"></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="requirements">Requisitos del Proyecto</label>
-                                <textarea id="requirements" rows="4" placeholder="Ingrese los requisitos del proyecto"></textarea>
-                            </div>
-
-                            <div class="modal-actions">
-                                <button type="button" class="btn btn-danger" id="rejectBtn">Rechazar</button>
-                                <button type="button" class="btn btn-secondary" id="cancelApprovalBtn">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Aprobar Proyecto</button>
-                            </div>
-                        </form>
                     </div>
-                </div>
-            </section>
+                </section>
 
-            <!-- Module 3: Project Tracking -->
-            <section id="tracking-module" class="module">
-                <div class="module-header">
-                    <h2>Seguimiento de Proyectos</h2>
-                    <p class="module-description">Monitoreo de progreso y uso de IA</p>
-                </div>
+                <!-- Module 2: Project Approval - Manager only with new approval flow -->
+                <!-- Module 2: Project Approval -->
+                <section id="approval-module" class="module">
+                    <div class="module-header">
+                        <h2>Proyectos Pendientes de Aprobación</h2>
+                        <p class="module-description">Departamento de Innovación Tecnológica</p>
+                    </div>
 
-                <div id="trackingProjects" class="tracking-list">
-                    <!-- Approved projects will be loaded here -->
-                </div>
+                    <div id="pendingProjects" class="approval-list">
+                        <!-- Pending projects will be loaded here -->
+                    </div>
 
-                <!-- Update Progress Modal -->
-                <div id="progressModal" class="modal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3>Actualizar Progreso</h3>
-                            <button class="close-btn">&times;</button>
+                    <!-- Approval Modal -->
+                    <div id="approvalModal" class="modal">
+                        <div class="modal-content modal-large">
+                            <div class="modal-header">
+                                <h3>Revisar Proyecto</h3>
+                                <button class="close-btn" data-modal="approvalModal">&times;</button>
+                            </div>
+                            <div id="approvalProjectDetails"></div>
+                            <form id="approvalForm">
+                                <div class="form-group">
+                                    <label>Incentivo Asignado</label>
+                                    <select id="projectIncentive" required>
+                                        <option value="">Seleccionar incentivo...</option>
+                                        <option value="economico">Incentivo Económico</option>
+                                        <option value="laboral">Incentivo Laboral</option>
+                                        <option value="temporal">Incentivo Temporal</option>
+                                        <option value="formacion">Formación Especializada</option>
+                                        <option value="recursos">Recursos Adicionales</option>
+                                        <option value="otro">Otro</option>
+                                    </select>
+                                </div>
+
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" id="returnProjectBtn">Devolver</button>
+                                    <button type="button" class="btn btn-danger" id="rejectProjectBtn">No Aprobar</button>
+                                    <button type="button" class="btn btn-secondary" data-action="cancel">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Aprobar Proyecto</button>
+                                </div>
+                            </form>
                         </div>
-                        <div id="progressProjectDetails"></div>
-                        <form id="progressForm">
-                            <div class="form-group">
-                                <label for="progressPercentage">Porcentaje de Avance (%)</label>
-                                <input type="range" id="progressPercentage" min="0" max="100" value="0" step="5">
-                                <div class="progress-display">
-                                    <span id="progressValue">0%</span>
+                    </div>
+                </section>
+
+                <!-- Module 3: Project Tracking - Different views for Gerente vs Líder -->
+                <!-- Module 3: Project Tracking -->
+                <section id="tracking-module" class="module">
+                    <div class="module-header">
+                        <h2>Seguimiento de Proyectos</h2>
+                        <p class="module-description">Monitoreo de progreso</p>
+                    </div>
+
+                    <div id="trackingProjects" class="tracking-list">
+                        <!-- Approved projects will be loaded here -->
+                    </div>
+
+                    <!-- Leader modal for selecting completed user stories -->
+                    <!-- Update Progress Modal - Leader -->
+                    <div id="leaderProgressModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Actualizar Progreso del Proyecto</h3>
+                                <button class="close-btn" data-modal="leaderProgressModal">&times;</button>
+                            </div>
+                            <div id="leaderProgressDetails"></div>
+                            <form id="leaderProgressForm">
+                                <div class="form-group">
+                                    <label>Historias de Usuario Completadas</label>
+                                    <div id="userStoriesChecklistLeader" class="user-stories-checklist">
+                                        <!-- Checklist will be loaded here -->
+                                    </div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="evidenceFile">Archivo de Evidencia *</label>
+                                    <input type="file" id="evidenceFile" required accept=".pdf,.doc,.docx,.jpg,.png,.zip">
+                                    <small class="form-hint">Suba evidencia de las historias completadas</small>
+                                </div>
+
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" data-action="cancel">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Enviar Progreso</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Manager modal for approving user stories -->
+                    <!-- Approve Progress Modal - Manager -->
+                    <div id="managerProgressModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Aprobar Progreso del Proyecto</h3>
+                                <button class="close-btn" data-modal="managerProgressModal">&times;</button>
                             </div>
+                            <div id="managerProgressDetails"></div>
+                            <form id="managerProgressForm">
+                                <div class="form-group">
+                                    <label>Historias de Usuario Pendientes de Aprobación</label>
+                                    <div id="userStoriesChecklistManager" class="user-stories-checklist">
+                                        <!-- Checklist will be loaded here -->
+                                    </div>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="aiUsageVerification">Verificación de Uso de IA</label>
-                                <select id="aiUsageVerification" required>
-                                    <option value="verificado">✓ Verificado - Uso activo de IA</option>
-                                    <option value="parcial">⚠ Parcial - Uso esporádico de IA</option>
-                                    <option value="no-verificado">✗ No verificado - Sin evidencia de uso</option>
-                                </select>
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" data-action="cancel">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Aprobar Historias</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Module 4: Project History -->
+                <section id="history-module" class="module">
+                    <div class="module-header">
+                        <h2>Histórico de Proyectos</h2>
+                        <div class="filter-controls">
+                            <input type="text" id="filterLeader" placeholder="Filtrar por líder..." class="manager-only-input">
+                            <input type="text" id="filterCompany" placeholder="Filtrar por empresa...">
+                            <select id="filterStatus">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="devuelto">Devuelto</option>
+                                <option value="aprobado">Aprobado</option>
+                                <option value="no-aprobado">No Aprobado</option>
+                                <option value="cancelado">Cancelado</option>
+                            </select>
+                            <button class="btn btn-secondary" id="clearFilters">Limpiar Filtros</button>
+                        </div>
+                    </div>
+
+                    <!-- Stats only visible to managers -->
+                    <div class="history-stats manager-only-section">
+                        <div class="stat-card">
+                            <h4>Total Proyectos</h4>
+                            <p class="stat-number" id="totalProjects">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Aprobados</h4>
+                            <p class="stat-number" id="approvedProjects">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>Pendientes</h4>
+                            <p class="stat-number" id="pendingProjectsCount">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <h4>No Aprobados</h4>
+                            <p class="stat-number" id="rejectedProjects">0</p>
+                        </div>
+                    </div>
+
+                    <div id="historyTable" class="history-table">
+                        <!-- History table will be loaded here -->
+                    </div>
+                </section>
+
+                <!-- New Module 5: User Registration - Manager Only -->
+                <!-- Module 5: User Registration -->
+                <section id="users-module" class="module">
+                    <div class="module-header">
+                        <h2>Registro de Usuarios</h2>
+                        <button class="btn btn-primary" id="newUserBtn">+ Nuevo Usuario</button>
+                    </div>
+
+                    <div class="users-grid" id="usersGrid">
+                        <!-- Users will be dynamically loaded here -->
+                    </div>
+
+                    <!-- Create User Modal -->
+                    <div id="userModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Registrar Nuevo Usuario</h3>
+                                <button class="close-btn" data-modal="userModal">&times;</button>
                             </div>
+                            <form id="userForm">
+                                <div class="form-group">
+                                    <label for="userName">Nombre Completo *</label>
+                                    <input type="text" id="userName" required>
+                                </div>
 
-                            <div class="form-group">
-                                <label for="progressNotes">Notas de Progreso</label>
-                                <textarea id="progressNotes" rows="3" placeholder="Describa los avances y el uso de IA en el desarrollo"></textarea>
-                            </div>
+                                <div class="form-group">
+                                    <label for="userUsername">Usuario *</label>
+                                    <input type="text" id="userUsername" required>
+                                </div>
 
-                            <div class="modal-actions">
-                                <button type="button" class="btn btn-secondary" id="cancelProgressBtn">Cancelar</button>
-                                <button type="submit" class="btn btn-primary">Actualizar Progreso</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </section>
+                                <div class="form-group">
+                                    <label for="userPassword">Contraseña *</label>
+                                    <input type="password" id="userPassword" required minlength="6">
+                                    <small class="form-hint">Mínimo 6 caracteres</small>
+                                </div>
 
-            <!-- Module 4: Project History (Manager Only) -->
-            <section id="history-module" class="module">
-                <div class="module-header">
-                    <h2>Histórico de Proyectos</h2>
-                    <div class="filter-controls">
-                        <input type="text" id="filterLeader" placeholder="Filtrar por líder...">
-                        <input type="text" id="filterCompany" placeholder="Filtrar por empresa...">
-                        <select id="filterStatus">
-                            <option value="">Todos los estados</option>
-                            <option value="pendiente">Pendiente</option>
-                            <option value="aprobado">Aprobado</option>
-                            <option value="rechazado">Rechazado</option>
-                            <option value="completado">Completado</option>
-                        </select>
-                        <button class="btn btn-secondary" id="clearFilters">Limpiar Filtros</button>
-                    </div>
-                </div>
+                                <div class="form-group">
+                                    <label for="userRole">Rol *</label>
+                                    <select id="userRole" required>
+                                        <option value="">Seleccionar...</option>
+                                        <option value="leader">Líder de Proyecto</option>
+                                        <option value="manager">Gerente</option>
+                                    </select>
+                                </div>
 
-                <div class="history-stats">
-                    <div class="stat-card">
-                        <h4>Total Proyectos</h4>
-                        <p class="stat-number" id="totalProjects">0</p>
+                                <div class="modal-actions">
+                                    <button type="button" class="btn btn-secondary" data-action="cancel">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Registrar Usuario</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <h4>Aprobados</h4>
-                        <p class="stat-number" id="approvedProjects">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Pendientes</h4>
-                        <p class="stat-number" id="pendingProjectsCount">0</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Rechazados</h4>
-                        <p class="stat-number" id="rejectedProjects">0</p>
-                    </div>
-                </div>
-
-                <div id="historyTable" class="history-table">
-                    <!-- History table will be loaded here -->
-                </div>
-            </section>
-        </div>
-    </main>
+                </section>
+            </div>
+        </main>
+    </div>
 
     <!-- Toast Notifications -->
     <div id="toast" class="toast"></div>
