@@ -38,6 +38,16 @@ body {
   letter-spacing: 1px;
 }
 
+.logo-img {
+  width: auto;         /* Mantiene su tamaño original */
+  height: 100px;
+  border-radius: 15px; /* Usa píxeles en vez de porcentaje */
+  display: block;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  border: 2px solid #fff;
+}
+
+
 .user-info {
   display: flex;
   align-items: center;
